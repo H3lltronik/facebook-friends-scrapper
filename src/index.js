@@ -17,7 +17,6 @@ import puppeteer from "puppeteer";
   // Go to profile page
   const profileUrl = "https://www.facebook.com/esau.gonzalezsoto";
   await page.goto(profileUrl);
-  console.log("aca");
   await wait(5000);
 
   let found = false;
@@ -39,7 +38,6 @@ import puppeteer from "puppeteer";
       let maxScrolls = 1000;
       const scrollLoop = async () => {
         while (scrollHeight !== document.documentElement.scrollHeight) {
-          console.log("wa");
           scrollHeight = document.documentElement.scrollHeight;
           scroll();
           if (maxScrolls-- === 0) break;
@@ -47,14 +45,12 @@ import puppeteer from "puppeteer";
           await wait(1000);
         }
 
-        console.log("end");
         await wait(10000);
       };
 
       scrollLoop();
     });
 
-    console.log("Execution finished");
 
     // const friendsSelector = "body div div div div div[role=main] div div div div div div div div div:has( label input[aria-label='Label for text input'] )";
     // await page.waitForSelector(friendsSelector);

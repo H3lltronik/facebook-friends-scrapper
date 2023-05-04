@@ -38,33 +38,43 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.retrieveFriends = exports.friendsSearch = void 0;
 var puppeteerScroll = require("./scroll").puppeteerScroll;
+var logger_1 = require("./logger");
 var friendsSearch = function (page, name) { return __awaiter(void 0, void 0, void 0, function () {
     var profiles, result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, page.waitForSelector('input[placeholder="Buscar"]')];
+            case 0: return [4 /*yield*/, (0, logger_1.log)("Searching in friends for: " + name)];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, page.type('input[placeholder="Buscar"]', name.toString())];
+                return [4 /*yield*/, page.waitForSelector('input[placeholder="Buscar"]')];
             case 2:
                 _a.sent();
-                return [4 /*yield*/, page.keyboard.press("Enter")];
+                return [4 /*yield*/, page.type('input[placeholder="Buscar"]', name.toString())];
             case 3:
                 _a.sent();
-                return [4 /*yield*/, page.waitForSelector("div[role='main']", { timeout: 1000 })];
+                return [4 /*yield*/, page.keyboard.press("Enter")];
             case 4:
                 _a.sent();
-                return [4 /*yield*/, (0, exports.retrieveFriends)(page)];
+                return [4 /*yield*/, page.waitForSelector("div[role='main']", { timeout: 1000 })];
             case 5:
+                _a.sent();
+                return [4 /*yield*/, (0, exports.retrieveFriends)(page)];
+            case 6:
                 profiles = _a.sent();
                 result = profiles.find(function (profile) { return profile.name == name; });
-                if (result) {
-                    console.log("FOUND: ", result);
-                }
-                else {
-                    console.log("NOT FOUND");
-                }
-                return [2 /*return*/, result];
+                if (!result) return [3 /*break*/, 9];
+                return [4 /*yield*/, (0, logger_1.log)("FOUND: ")];
+            case 7:
+                _a.sent();
+                return [4 /*yield*/, (0, logger_1.log)(JSON.stringify(result), { prettyPrint: true })];
+            case 8:
+                _a.sent();
+                return [3 /*break*/, 11];
+            case 9: return [4 /*yield*/, (0, logger_1.log)("NOT FOUND")];
+            case 10:
+                _a.sent();
+                _a.label = 11;
+            case 11: return [2 /*return*/, result];
         }
     });
 }); };

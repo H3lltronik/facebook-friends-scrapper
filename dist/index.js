@@ -40,26 +40,25 @@ var puppeteer = require("puppeteer-extra");
 var StealthPlugin = require("puppeteer-extra-plugin-stealth");
 var friends_1 = require("./friends");
 var instances_1 = require("./instances");
+var logger_1 = require("./logger");
 puppeteer.use(StealthPlugin());
 var url = "https://www.facebook.com/";
-var profileUrl = "https://www.facebook.com/profile.php?id=100052777428396";
-var nameSearch = "BeTito Reyes";
+var profileUrl = "https://www.facebook.com/esau.gonzalezsoto";
+var nameSearch = "Helen De Anda Salmerón";
 var wait = function (ms) { return new Promise(function (resolve) { return setTimeout(resolve, ms); }); };
-var date = new Date();
-var fileName = "results-".concat(date.getFullYear(), "-").concat(date.getMonth(), "-").concat(date.getDate(), ".json");
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
     var browser, rootPage, pageFound, rootProfiles, foundInProfiles, index, _i, rootProfiles_1, profile, page, pageFound_1, results, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, saveToFile("Starting process")];
+            case 0: return [4 /*yield*/, (0, logger_1.log)("Starting process")];
             case 1:
                 _a.sent();
                 return [4 /*yield*/, (0, instances_1.getBrowser)()];
             case 2:
                 browser = _a.sent();
-                return [4 /*yield*/, browser.newPage()];
+                return [4 /*yield*/, browser.pages()];
             case 3:
-                rootPage = _a.sent();
+                rootPage = (_a.sent())[0];
                 return [4 /*yield*/, blockResources(rootPage)];
             case 4:
                 _a.sent();
@@ -72,72 +71,92 @@ var main = function () { return __awaiter(void 0, void 0, void 0, function () {
                 return [4 /*yield*/, goToFriendsPage(rootPage, profileUrl)];
             case 7:
                 pageFound = _a.sent();
-                if (!pageFound) {
-                    console.log("Could not find the friends page of ".concat(profileUrl));
-                    return [2 /*return*/];
-                }
-                return [4 /*yield*/, (0, friends_1.retrieveFriends)(rootPage)];
+                if (!!pageFound) return [3 /*break*/, 9];
+                return [4 /*yield*/, (0, logger_1.log)("Could not find the friends page of ".concat(profileUrl))];
             case 8:
+                _a.sent();
+                return [2 /*return*/];
+            case 9: return [4 /*yield*/, (0, friends_1.retrieveFriends)(rootPage)];
+            case 10:
                 rootProfiles = _a.sent();
-                console.log("Found ".concat(rootProfiles.length, " profiles"));
+                return [4 /*yield*/, (0, logger_1.log)("Found ".concat(rootProfiles.length, " profiles"))];
+            case 11:
+                _a.sent();
                 foundInProfiles = [];
                 index = 0;
-                _a.label = 9;
-            case 9:
-                _a.trys.push([9, 19, , 21]);
+                _a.label = 12;
+            case 12:
+                _a.trys.push([12, 28, , 32]);
                 _i = 0, rootProfiles_1 = rootProfiles;
-                _a.label = 10;
-            case 10:
-                if (!(_i < rootProfiles_1.length)) return [3 /*break*/, 18];
+                _a.label = 13;
+            case 13:
+                if (!(_i < rootProfiles_1.length)) return [3 /*break*/, 27];
                 profile = rootProfiles_1[_i];
-                console.log("Searching ".concat(profile.name, ", number ").concat(++index, " of ").concat(rootProfiles.length));
+                if (!(index > 0)) return [3 /*break*/, 15];
+                return [4 /*yield*/, (0, logger_1.log)("---------------------------------")];
+            case 14:
+                _a.sent();
+                _a.label = 15;
+            case 15: return [4 /*yield*/, (0, logger_1.log)("Searching ".concat(profile.name, ", number ").concat(++index, " of ").concat(rootProfiles.length))];
+            case 16:
+                _a.sent();
                 return [4 /*yield*/, browser.newPage()];
-            case 11:
+            case 17:
                 page = _a.sent();
                 return [4 /*yield*/, blockResources(page)];
-            case 12:
+            case 18:
                 _a.sent();
                 return [4 /*yield*/, goToFriendsPage(page, profile.url)];
-            case 13:
-                pageFound_1 = _a.sent();
-                if (!pageFound_1) {
-                    console.log("Could not find the friends page of ".concat(profile.name));
-                    page.close();
-                    return [3 /*break*/, 17];
-                }
-                return [4 /*yield*/, (0, friends_1.friendsSearch)(page, nameSearch)];
-            case 14:
-                results = _a.sent();
-                if (!results) return [3 /*break*/, 16];
-                console.log(results);
-                return [4 /*yield*/, saveToFile(results, true)];
-            case 15:
-                _a.sent();
-                foundInProfiles.push(profile);
-                _a.label = 16;
-            case 16:
-                page.close();
-                _a.label = 17;
-            case 17:
-                _i++;
-                return [3 /*break*/, 10];
-            case 18: return [3 /*break*/, 21];
             case 19:
-                error_1 = _a.sent();
-                console.log("The process failed at index ".concat(index));
-                console.log("Saved calculated profiles to file");
-                return [4 /*yield*/, saveToFile(foundInProfiles, true)];
+                pageFound_1 = _a.sent();
+                if (!!pageFound_1) return [3 /*break*/, 21];
+                return [4 /*yield*/, (0, logger_1.log)("Could not find the friends page of ".concat(profile.name))];
             case 20:
                 _a.sent();
-                return [3 /*break*/, 21];
-            case 21:
-                console.log("Profiles that have ".concat(nameSearch, " as a friend:"));
-                console.log(foundInProfiles);
-                return [4 /*yield*/, wait(10000)];
+                page.close();
+                return [3 /*break*/, 26];
+            case 21: return [4 /*yield*/, (0, friends_1.friendsSearch)(page, nameSearch)];
             case 22:
+                results = _a.sent();
+                if (!results) return [3 /*break*/, 25];
+                return [4 /*yield*/, (0, logger_1.log)(JSON.stringify(results), { prettyPrint: true })];
+            case 23:
+                _a.sent();
+                return [4 /*yield*/, (0, logger_1.saveToFile)(results, true)];
+            case 24:
+                _a.sent();
+                foundInProfiles.push(profile);
+                _a.label = 25;
+            case 25:
+                page.close();
+                _a.label = 26;
+            case 26:
+                _i++;
+                return [3 /*break*/, 13];
+            case 27: return [3 /*break*/, 32];
+            case 28:
+                error_1 = _a.sent();
+                return [4 /*yield*/, (0, logger_1.log)("The process failed at index ".concat(index), { type: logger_1.LOG_TYPES.ERROR })];
+            case 29:
+                _a.sent();
+                return [4 /*yield*/, (0, logger_1.log)("Saved calculated profiles to file")];
+            case 30:
+                _a.sent();
+                return [4 /*yield*/, (0, logger_1.saveToFile)(foundInProfiles, true)];
+            case 31:
+                _a.sent();
+                return [3 /*break*/, 32];
+            case 32: return [4 /*yield*/, (0, logger_1.log)("Profiles that have ".concat(nameSearch, " as a friend:"))];
+            case 33:
+                _a.sent();
+                return [4 /*yield*/, (0, logger_1.log)(JSON.stringify(foundInProfiles), { prettyPrint: true })];
+            case 34:
+                _a.sent();
+                return [4 /*yield*/, wait(10000)];
+            case 35:
                 _a.sent();
                 return [4 /*yield*/, browser.close()];
-            case 23:
+            case 36:
                 _a.sent();
                 return [2 /*return*/];
         }
@@ -224,23 +243,4 @@ var goToFriendsPage = function (page, profileUrl) { return __awaiter(void 0, voi
         }
     });
 }); };
-var saveToFile = function (data, prettyPrint) {
-    if (prettyPrint === void 0) { prettyPrint = false; }
-    return new Promise(function (resolve, reject) {
-        var fs = require("fs");
-        var jsonData;
-        if (prettyPrint) {
-            jsonData = JSON.stringify(data, null, 2);
-        }
-        else {
-            jsonData = JSON.stringify(data);
-        }
-        fs.appendFile(fileName, jsonData, function (err) {
-            if (err)
-                reject(err);
-            else
-                resolve(true);
-        });
-    });
-};
 main();

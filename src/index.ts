@@ -3,22 +3,20 @@ const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 import { Browser, Page } from "puppeteer";
 import { friendsSearch, retrieveFriends } from "./friends";
 import { getBrowser } from "./instances";
+import { saveToFile, log, LOG_TYPES } from "./logger";
 
 puppeteer.use(StealthPlugin());
 
 const url = "https://www.facebook.com/";
-const profileUrl = "https://www.facebook.com/profile.php?id=100052777428396";
-const nameSearch = "BeTito Reyes";
+const profileUrl = "https://www.facebook.com/esau.gonzalezsoto";
+const nameSearch = "Helen De Anda Salmerón";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const date = new Date();
-const fileName = `results-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}.json`;
 const main = async () => {
-  await saveToFile("Starting process");
+  await log("Starting process");
   const browser: Browser = await getBrowser();
 
-  const rootPage = await browser.newPage();
+  const rootPage = (await browser.pages())[0];
   await blockResources(rootPage);
   await rootPage.goto(url, { waitUntil: "networkidle2" });
 
@@ -26,18 +24,19 @@ const main = async () => {
 
   const pageFound = await goToFriendsPage(rootPage, profileUrl);
   if (!pageFound) {
-    console.log(`Could not find the friends page of ${profileUrl}`);
+    await log(`Could not find the friends page of ${profileUrl}`);
     return;
   }
 
   const rootProfiles = await retrieveFriends(rootPage);
-  console.log(`Found ${rootProfiles.length} profiles`);
+  await log(`Found ${rootProfiles.length} profiles`);
   const foundInProfiles = [];
   let index = 0;
 
   try {
     for (const profile of rootProfiles) {
-      console.log(
+      if (index > 0) await log("---------------------------------");
+      await log(
         `Searching ${profile.name}, number ${++index} of ${rootProfiles.length}`
       );
       const page = await browser.newPage();
@@ -45,7 +44,7 @@ const main = async () => {
 
       const pageFound = await goToFriendsPage(page, profile.url);
       if (!pageFound) {
-        console.log(`Could not find the friends page of ${profile.name}`);
+        await log(`Could not find the friends page of ${profile.name}`);
         page.close();
         continue;
       }
@@ -53,7 +52,7 @@ const main = async () => {
       const results = await friendsSearch(page, nameSearch);
 
       if (results) {
-        console.log(results);
+        await log(JSON.stringify(results), { prettyPrint: true });
         await saveToFile(results, true);
         foundInProfiles.push(profile);
       }
@@ -61,13 +60,13 @@ const main = async () => {
       page.close();
     }
   } catch (error) {
-    console.log(`The process failed at index ${index}`);
-    console.log(`Saved calculated profiles to file`);
+    await log(`The process failed at index ${index}`, { type: LOG_TYPES.ERROR});
+    await log(`Saved calculated profiles to file`);
     await saveToFile(foundInProfiles, true);
   }
 
-  console.log(`Profiles that have ${nameSearch} as a friend:`);
-  console.log(foundInProfiles);
+  await log(`Profiles that have ${nameSearch} as a friend:`);
+  await log(JSON.stringify(foundInProfiles), { prettyPrint: true });
 
   await wait(10000);
   await browser.close();
@@ -122,23 +121,6 @@ const goToFriendsPage = async (page: Page, profileUrl: String) => {
   if (await checkNotPageFound(page)) return false;
 
   return true;
-};
-
-const saveToFile = (data: any, prettyPrint: boolean = false) => {
-  return new Promise((resolve, reject) => {
-    const fs = require("fs");
-
-    let jsonData;
-    if (prettyPrint) {
-      jsonData = JSON.stringify(data, null, 2);
-    } else {
-      jsonData = JSON.stringify(data);
-    }
-    fs.appendFile(fileName, jsonData, (err: any) => {
-      if (err) reject(err);
-      else resolve(true);
-    });
-  });
 };
 
 main();

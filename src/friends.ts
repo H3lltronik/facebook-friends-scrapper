@@ -1,7 +1,9 @@
 import { Browser, Page } from "puppeteer";
 const { puppeteerScroll } = require("./scroll");
+import { log } from "./logger";
 
 export const friendsSearch = async (page: Page, name: String) => {
+  await log("Searching in friends for: " + name);
   await page.waitForSelector('input[placeholder="Buscar"]');
   await page.type('input[placeholder="Buscar"]', name.toString());
   await page.keyboard.press("Enter");
@@ -12,9 +14,10 @@ export const friendsSearch = async (page: Page, name: String) => {
   const result = profiles.find((profile) => profile.name == name);
 
   if (result) {
-    console.log("FOUND: ", result);
+    await log("FOUND: ");
+    await log(JSON.stringify(result), {prettyPrint: true});
   } else {
-    console.log("NOT FOUND");
+    await log("NOT FOUND");
   }
 
   return result;
